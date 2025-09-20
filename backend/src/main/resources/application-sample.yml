@@ -1,0 +1,43 @@
+spring:
+  datasource:
+    username: your-db-username  # e.g., postgres
+    password: your-db-password  # e.g., root
+    url: jdbc:postgresql://localhost:5432/your-db-name  # e.g., service
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: your-email@gmail.com  # your Gmail address
+    password: your-app-password     # Gmail app password (not real email password!)
+    properties:
+      mail:
+        debug: true
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+application:
+  security:
+    jwt:
+      secret-key: your-jwt-secret-key  # e.g., long random string
+      expiration: 86400000             # 1 day in milliseconds
+      refresh-token:
+        expiration: 604800000          # 7 days in milliseconds
+
+two:
+  factor:
+    auth:
+      otp:
+        expiration-minutes: 5          # OTP valid for 5 minutes
