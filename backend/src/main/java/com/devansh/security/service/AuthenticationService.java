@@ -6,7 +6,7 @@ import com.devansh.exception.OtpException;
 import com.devansh.exception.TokenInvalidException;
 import com.devansh.exception.UserAlreadyExistException;
 import com.devansh.exception.UserException;
-import com.devansh.model.Role;
+import com.devansh.model.enums.Role;
 import com.devansh.model.User;
 import com.devansh.repo.UserRepository;
 import com.devansh.response.AuthenticationResponse;
@@ -41,21 +41,17 @@ public class AuthenticationService {
 
     public AuthenticationResponse register(RegisterRequest request) throws UserAlreadyExistException {
 
-        if (request.getRole() == null) {
-            request.setRole(Role.USER);
-        }
-
         var user = User.builder()
-                .fullname(request.getFullname())
+                .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(request.getRole())
+                .role(Role.USER)
                 .createdAt(LocalDateTime.now())
                 .isEmailVerified(false)
                 .build();
 
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new UserAlreadyExistException("Email already in use: " + request.getEmail());
+        if (userRepository.findByUsernameOrEmail(request.getUsername(), request.getEmail()).isPresent()) {
+            throw new UserAlreadyExistException("Email or Username already in use: " + request.getEmail() + ", " + request.getUsername());
         }
 
         userRepository.save(user);
@@ -81,7 +77,7 @@ public class AuthenticationService {
         // cache user details + otp
         Map<String, Object> data = new HashMap<>();
         data.put("otp", otp);
-        data.put("fullname", savedUser.getFullname());
+        data.put("username", savedUser.getUsername());
         data.put("email", savedUser.getEmail());
         data.put("role", savedUser.getRole());
         data.put("password", savedUser.getPassword());
@@ -111,7 +107,7 @@ public class AuthenticationService {
 
             if (otpVerificationRequestDto.getContext().equals(OtpContext.SIGN_UP)) {
                 User user = User.builder()
-                        .fullname((String) data.get("fullname"))
+                        .username((String) data.get("username"))
                         .email((String) data.get("email"))
                         .password((String) data.get("password"))
                         .role((Role) data.get("role"))
@@ -145,6 +141,7 @@ public class AuthenticationService {
                                 .accessToken(accessToken)
                                 .refreshToken(refreshToken)
                                 .build());
+
             } else if (otpVerificationRequestDto.getContext().equals(OtpContext.RESET_PASSWORD)) {
                 User user = userRepository
                         .findByEmail(otpVerificationRequestDto.getEmailId())

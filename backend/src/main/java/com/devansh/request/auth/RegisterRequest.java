@@ -1,6 +1,6 @@
 package com.devansh.request.auth;
 
-import com.devansh.model.Role;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,10 +12,10 @@ import lombok.NoArgsConstructor;
 @Builder
 public class RegisterRequest {
 
-    private String fullname;
+    @JsonProperty(required = true)
+    private String username;
+    @JsonProperty(required = true)
     private String email;
+    @JsonProperty(required = true)
     private String password;
-    private Role role;
-
-
 }

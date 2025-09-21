@@ -4,7 +4,6 @@ import com.devansh.exception.OtpException;
 import com.devansh.exception.TokenInvalidException;
 import com.devansh.exception.UserAlreadyExistException;
 import com.devansh.exception.UserException;
-import com.devansh.model.Role;
 import com.devansh.request.auth.AuthenticationRequest;
 import com.devansh.request.auth.OtpVerificationRequest;
 import com.devansh.request.auth.RegisterRequest;

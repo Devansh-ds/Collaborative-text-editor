@@ -1,5 +1,6 @@
 package com.devansh.model;
 
+import com.devansh.model.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -21,17 +22,18 @@ import java.util.List;
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private String username;
 
     @Column(unique = true, nullable = false)
     private String email;
-    private String password;
 
-    private String fullname;
+    private String password;
 
     @CreationTimestamp
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @OneToMany(mappedBy = "user")
+    private List<UserDoc> accessDoc;
 
     @Column(name = "email_verified")
     private boolean isEmailVerified;
