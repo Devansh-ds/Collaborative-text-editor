@@ -34,16 +34,16 @@ public class DocAuthorizationServiceImpl implements DocAuthorizationService {
 
     @Override
     public boolean canEdit(String username, Doc doc) {
-        return doc.getOwner().getUsername().equals(username) ||
+        return doc.getOwner().getDisplayName().equals(username) ||
                 doc.getSharedWith()
                         .stream()
                         .anyMatch(userDoc ->
-                                userDoc.getUser().getUsername().equals(username) && userDoc.getPermission().equals(Permission.EDIT)
+                                userDoc.getUser().getDisplayName().equals(username) && userDoc.getPermission().equals(Permission.EDIT)
                         );
     }
 
     @Override
     public boolean fullAccess(String username, Doc doc) {
-        return doc.getOwner().getUsername().equals(username);
+        return doc.getOwner().getDisplayName().equals(username);
     }
 }

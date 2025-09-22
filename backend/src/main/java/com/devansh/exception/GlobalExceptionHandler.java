@@ -69,4 +69,26 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(UnauthorizedUserException.class)
+    public ResponseEntity<ErrorResponse> hadnleUnauthorizedException(UnauthorizedUserException e, WebRequest request) {
+        ErrorResponse response = ErrorResponse
+                .builder()
+                .errorMessage(e.getMessage())
+                .timestamp(LocalDateTime.now())
+                .endpoint(request.getDescription(false).replace("uri=", ""))
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleResourceException(ResourceNotFoundException e, WebRequest request) {
+        ErrorResponse response = ErrorResponse
+                .builder()
+                .errorMessage(e.getMessage())
+                .timestamp(LocalDateTime.now())
+                .endpoint(request.getDescription(false).replace("uri=", ""))
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
 }

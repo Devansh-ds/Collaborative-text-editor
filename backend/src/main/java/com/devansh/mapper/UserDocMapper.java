@@ -9,7 +9,7 @@ public class UserDocMapper {
 
     public UserDocDto toUserDocDto(UserDoc userDoc) {
         return UserDocDto.builder()
-                .username(userDoc.getUser().getUsername())
+                .username(userDoc.getUser().getDisplayName())
                 .permission(userDoc.getPermission())
                 .build();
     }

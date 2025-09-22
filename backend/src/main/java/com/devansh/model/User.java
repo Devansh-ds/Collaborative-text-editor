@@ -51,7 +51,20 @@ public class User implements UserDetails {
         return email;
     }
 
+    public String getDisplayName() {
+        return username;
+    }
 
+    @Override
+    public String toString() {
+        return "User{" +
+                "username='" + username + '\'' +
+                ", email='" + email + '\'' +
+                ", createdAt=" + createdAt +
+                ", isEmailVerified=" + isEmailVerified +
+                ", role=" + role +
+                '}';
+    }
 }
 
 

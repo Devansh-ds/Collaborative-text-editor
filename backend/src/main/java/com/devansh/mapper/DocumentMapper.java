@@ -23,7 +23,7 @@ public class DocumentMapper {
         return DocumentDto.builder()
                 .id(savedDoc.getId())
                 .title(savedDoc.getTitle())
-                .owner(savedDoc.getOwner().getUsername())
+                .owner(savedDoc.getOwner().getDisplayName())
                 .content(null)
                 .sharedWith(userDocDtos)
                 .build();

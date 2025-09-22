@@ -168,15 +168,15 @@ public class AuthenticationService {
 
     public ResponseEntity authenticate(AuthenticationRequest request) throws UserException {
 
+        var user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new UserException(request.getEmail() + " does not exist"));
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
                         request.getPassword()
                 )
         );
-
-        var user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new UserException(request.getEmail() + " does not exist"));
 
         if (user.isEmailVerified()) {
             sendOtp(user, "2FA: Request to log in to your account");

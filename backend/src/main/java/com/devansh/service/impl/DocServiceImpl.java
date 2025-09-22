@@ -4,7 +4,6 @@ import com.devansh.engine.Crdt;
 import com.devansh.engine.CrdtManagerService;
 import com.devansh.exception.ResourceNotFoundException;
 import com.devansh.exception.UnauthorizedUserException;
-import com.devansh.exception.UserException;
 import com.devansh.mapper.DocumentChangeMapper;
 import com.devansh.mapper.DocumentMapper;
 import com.devansh.mapper.UserDocMapper;
@@ -23,7 +22,6 @@ import com.devansh.response.UserDocDto;
 import com.devansh.security.SecurityUtil;
 import com.devansh.service.DocAuthorizationService;
 import com.devansh.service.DocService;
-import com.devansh.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -50,8 +48,10 @@ public class DocServiceImpl implements DocService {
 
     private User getCurrentUser() {
         String email = SecurityUtil.getCurrentUserEmail();
-        return userRepository.findByEmail(email)
+
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Email not found with email: " + email));
+        return user;
     }
 
     private Doc getDocById(Long docId) throws ResourceNotFoundException {
@@ -64,6 +64,7 @@ public class DocServiceImpl implements DocService {
     public DocumentDto createDoc(DocTitleDto titleDto) {
         String title = titleDto.getTitle();
         User user = getCurrentUser();
+
         Doc doc = Doc.builder()
                 .owner(user)
                 .title(title)
@@ -71,6 +72,7 @@ public class DocServiceImpl implements DocService {
                 .sharedWith(new ArrayList<>())
                 .build();
         Doc savedDoc = docRepository.save(doc);
+
         return documentMapper.toDocumentDto(savedDoc);
     }
 
@@ -79,7 +81,7 @@ public class DocServiceImpl implements DocService {
     public Long deleteDoc(Long docId) throws ResourceNotFoundException, UnauthorizedUserException {
         Doc doc = getDocById(docId);
         User user = getCurrentUser();
-        if (!docAuthorizationService.fullAccess(user.getUsername(), doc)) {
+        if (!docAuthorizationService.fullAccess(user.getDisplayName(), doc)) {
             throw new UnauthorizedUserException("You are not authorized to delete this document.");
         }
         docRepository.deleteById(docId);
@@ -90,7 +92,7 @@ public class DocServiceImpl implements DocService {
     @Override
     public String updateDocTitle(Long docId, DocTitleDto titleDto) throws ResourceNotFoundException, UnauthorizedUserException {
         Doc doc = getDocById(docId);
-        String username = getCurrentUser().getUsername();
+        String username = getCurrentUser().getDisplayName();
         if (!docAuthorizationService.canEdit(username, doc)) {
             throw new UnauthorizedUserException("You are not authorized to edit the title.");
         }
@@ -106,13 +108,13 @@ public class DocServiceImpl implements DocService {
         Doc doc = getDocById(docId);
         User user = userRepository.findByUsername(userDocDto.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + userDocDto.getUsername()));
-        String username = getCurrentUser().getUsername();
+        String username = getCurrentUser().getDisplayName();
         if (!docAuthorizationService.canEdit(username, doc)) {
             throw new UnauthorizedUserException("You are not authorized to share this document");
         }
         UserDocId userDocId = UserDocId.builder()
                 .docId(docId)
-                .username(user.getUsername())
+                .username(user.getDisplayName())
                 .build();
         UserDoc userDoc = UserDoc.builder()
                 .userDocId(userDocId)
@@ -138,23 +140,25 @@ public class DocServiceImpl implements DocService {
     @Transactional
     @Override
     public String removeUser(Long docId, UserDocDto userDocDto) throws ResourceNotFoundException, UnauthorizedUserException {
-        String username = getCurrentUser().getUsername();
+        String username = getCurrentUser().getDisplayName();
         Doc doc = getDocById(docId);
-        if (!docAuthorizationService.canEdit(username, doc)) {
-            throw new UnauthorizedUserException("Only onwer of the document can remove users from this document");
+        if (!docAuthorizationService.fullAccess(username, doc)) {
+            throw new UnauthorizedUserException("Only owner of the document can remove users from this document");
         }
         int isDeleted = userDocRepository.deleteUserDocBy(userDocDto.getUsername(), docId, username);
         return isDeleted != 0 ? "User removed Successfully!" : "User not found";
     }
 
+    // only owner of the document can update the permission
     @Transactional
     @Override
     public String updatePermission(Long docId, UserDocDto userDocDto) throws ResourceNotFoundException, UnauthorizedUserException {
         validatePermission(userDocDto);
-        String username = getCurrentUser().getUsername();
+        String username = getCurrentUser().getDisplayName();
         Doc doc = getDocById(docId);
+
         if (!docAuthorizationService.canEdit(username, doc)) {
-            throw new UnauthorizedUserException("You are not allowd to update permission for this document");
+            throw new UnauthorizedUserException("You are not allowed to update permission for this document");
         }
         int isUpdated = userDocRepository.updateUserDocBy(
                 userDocDto.getUsername(),
@@ -162,13 +166,18 @@ public class DocServiceImpl implements DocService {
                 username,
                 userDocDto.getPermission()
         );
-        return isUpdated != 0 ? "Permission updated successfully" : "Permission not found";
+        if (isUpdated != 0) {
+            return "Permission updated successfully";
+        } else {
+            throw new UnauthorizedUserException("You are not authorized to update the permission");
+        }
     }
 
     @Transactional
     @Override
     public List<DocumentDto> getAllDocs() {
-        String username = getCurrentUser().getUsername();
+        String username = getCurrentUser().getDisplayName();
+
         List<Doc> myDocs = docRepository.findByUsername(username);
         return myDocs.stream()
                 .map(documentMapper::toDocumentDto)
