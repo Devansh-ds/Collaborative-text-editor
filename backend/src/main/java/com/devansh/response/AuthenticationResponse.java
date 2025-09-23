@@ -6,10 +6,12 @@ import lombok.Builder;
 public class AuthenticationResponse {
     private String accessToken;
     private String refreshToken;
+    private String displayName;
 
-    public AuthenticationResponse(String accessToken, String refreshToken) {
+    public AuthenticationResponse(String accessToken, String refreshToken, String displayName) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
+        this.displayName = displayName;
     }
 
     public AuthenticationResponse() {}
@@ -28,5 +30,13 @@ public class AuthenticationResponse {
 
     public void setRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 }

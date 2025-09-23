@@ -54,7 +54,7 @@ public class AuthenticationService {
             throw new UserAlreadyExistException("Email or Username already in use: " + request.getEmail() + ", " + request.getUsername());
         }
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
         String accessToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
@@ -62,6 +62,7 @@ public class AuthenticationService {
         return AuthenticationResponse.builder()
                         .accessToken(accessToken)
                         .refreshToken(refreshToken)
+                        .displayName(savedUser.getUsername())
                         .build();
     }
 
@@ -168,7 +169,7 @@ public class AuthenticationService {
 
     public ResponseEntity authenticate(AuthenticationRequest request) throws UserException {
 
-        var user = userRepository.findByEmail(request.getEmail())
+        User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UserException(request.getEmail() + " does not exist"));
 
         authenticationManager.authenticate(
@@ -188,6 +189,7 @@ public class AuthenticationService {
             return ResponseEntity.ok(AuthenticationResponse.builder()
                     .accessToken(accessToken)
                     .refreshToken(refreshToken)
+                    .displayName(user.getDisplayName())
                     .build());
         }
     }
@@ -209,7 +211,7 @@ public class AuthenticationService {
 
             if (jwtService.validateToken(refreshToken, user)) {
                 var accessToken = jwtService.generateToken(user);
-                return new AuthenticationResponse(accessToken, refreshToken);
+                return new AuthenticationResponse(accessToken, refreshToken, user.getDisplayName());
             } else {
                 throw new TokenInvalidException("refresh token is invalid");
             }

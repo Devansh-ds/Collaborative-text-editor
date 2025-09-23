@@ -4,6 +4,7 @@ import com.devansh.engine.Crdt;
 import com.devansh.engine.CrdtManagerService;
 import com.devansh.exception.ResourceNotFoundException;
 import com.devansh.exception.UnauthorizedUserException;
+import com.devansh.exception.UserException;
 import com.devansh.mapper.DocumentChangeMapper;
 import com.devansh.mapper.DocumentMapper;
 import com.devansh.mapper.UserDocMapper;
@@ -104,10 +105,10 @@ public class DocServiceImpl implements DocService {
     // anyone with edit permission can add user with the same permission.
     @Transactional
     @Override
-    public UserDocDto addUser(Long docId, UserDocDto userDocDto) throws ResourceNotFoundException, UnauthorizedUserException {
+    public UserDocDto addUser(Long docId, UserDocDto userDocDto) throws ResourceNotFoundException, UnauthorizedUserException, UserException {
         Doc doc = getDocById(docId);
         User user = userRepository.findByUsername(userDocDto.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + userDocDto.getUsername()));
+                .orElseThrow(() -> new UserException("User not found with username: " + userDocDto.getUsername()));
         String username = getCurrentUser().getDisplayName();
         if (!docAuthorizationService.canEdit(username, doc)) {
             throw new UnauthorizedUserException("You are not authorized to share this document");

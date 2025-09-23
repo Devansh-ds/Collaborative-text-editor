@@ -2,6 +2,7 @@ package com.devansh.controller;
 
 import com.devansh.exception.ResourceNotFoundException;
 import com.devansh.exception.UnauthorizedUserException;
+import com.devansh.exception.UserException;
 import com.devansh.request.DocTitleDto;
 import com.devansh.response.DocumentChangeDto;
 import com.devansh.response.DocumentDto;
@@ -39,7 +40,7 @@ public class DocController {
 
     @PatchMapping("/users/add/{docId}")
     public ResponseEntity<UserDocDto> addUser(@PathVariable Long docId,
-                                              @RequestBody UserDocDto userDocDto) throws UnauthorizedUserException, ResourceNotFoundException {
+                                              @RequestBody UserDocDto userDocDto) throws UnauthorizedUserException, ResourceNotFoundException, UserException {
         return ResponseEntity.ok(docService.addUser(docId, userDocDto));
     }
 
