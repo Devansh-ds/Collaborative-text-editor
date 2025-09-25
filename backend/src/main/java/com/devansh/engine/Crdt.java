@@ -38,52 +38,51 @@ public class Crdt {
     }
 
     public void insert(Item item) {
-        // =============================================
-        // Step 1: Handle insertion at the very beginning
-        // =============================================
+        // Case 1: Insert at the beginning
         if (item.getLeft() == null) {
-            String firstItemId = firstItem == null ? null : firstItem.getId();
-            String rightItemId = item.getRight() == null ? null : item.getRight().getId();
-
-            // If the new item's clientId has higher precedence than the first item
-            // then it should come before the current firstItem
-            if (!Objects.equals(firstItemId, rightItemId)
-                    && firstItem.getId().split("@")[1].compareTo(item.getId().split("@")[1]) > 0) {
-                // Only set new item's right pointer for now
-                item.setRight(firstItem);
-                // We do NOT modify firstItem.left here to avoid breaking the linked list yet
-            } else {
-                // Normal case: insert at beginning
-                item.setRight(firstItem);
-                if (firstItem != null) {
-                    firstItem.setLeft(item);
-                }
-                firstItem = item;             // Update head of the list
-                crdtMap.put(item.getId(), item); // Add to map for fast lookup
-                return;                       // Done inserting
+            item.setRight(firstItem);
+            if (firstItem != null) {
+                firstItem.setLeft(item);
             }
+            firstItem = item;
+            crdtMap.put(item.getId(), item);
+            return;
         }
 
-        // ==================================================
-        // Step 2: Insert somewhere in the middle or end
-        // ==================================================
-        // Slide 'item.getLeft()' forward until we find the correct left neighbor
-        // based on clientId ordering (tie-breaker for concurrent inserts)
-        while (item.getLeft().getRight() != item.getRight()
-                && item.getLeft().getLeft().getId().split("@")[1]
-                .compareTo(item.getId().split("@")[1]) > 0) {
-            // Move left pointer to next item to respect deterministic order
-            item.setLeft(item.getLeft().getRight());
+        // Case 2: Insert after some item
+        Item left = item.getLeft();
+        Item right = left.getRight();
+
+        // Slide forward until we find the correct spot (for concurrent inserts)
+        while (right != null && compare(item, right) > 0) {
+            left = right;
+            right = right.getRight();
         }
 
-        // Step 3: Link the new item in the list
-        item.setRight(item.getLeft().getRight());   // Set item's right pointer
-        crdtMap.put(item.getId(), item);            // Add to map for quick lookup
-        item.getLeft().setRight(item);              // Update left neighbor's right pointer
-        if (item.getRight() != null) {              // Update right neighbor's left pointer
-            item.getRight().setLeft(item);
+        // Link new item
+        item.setLeft(left);
+        item.setRight(right);
+        left.setRight(item);
+        if (right != null) {
+            right.setLeft(item);
         }
+
+        crdtMap.put(item.getId(), item);
     }
+
+    /**
+     * Compare two items to decide deterministic order for concurrent inserts.
+     * Return <0 if a should come before b, >0 if a after b, 0 if equal.
+     * This uses clientId or timestamp (you can customize).
+     */
+    private int compare(Item a, Item b) {
+        // Tie-breaker: use clientId after '@'
+        String aClient = a.getId().split("@")[1];
+        String bClient = b.getId().split("@")[1];
+        return aClient.compareTo(bClient);
+    }
+
+
 
     public void delete(String key) {
         Item item = crdtMap.get(key);
@@ -128,7 +127,7 @@ public class Crdt {
             out.writeObject(obj);
             return baos.toByteArray();
         } catch (IOException e) {
-            throw new RuntimeException("Failed to serialize Crdt: ", e);
+            throw new RuntimeException("Failed to serialize Crdt: " +  e);
         }
     }
 

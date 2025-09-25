@@ -42,6 +42,7 @@ public class SecurityConfig {
                         authorize -> authorize
                                 .requestMatchers("/auth/**")
                                 .permitAll()
+                                .requestMatchers("/docs/ws/**").permitAll()
 
                                 .requestMatchers("/admin/**").hasRole(Role.USER.name())
 

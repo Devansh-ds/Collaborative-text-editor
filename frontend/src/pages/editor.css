@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+.ql-toolbar {
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.2);
+}
+.ql-editor {
+  font-family: "Roboto", sans-serif;
+  font-size: 16px;
+  min-height: 12in;
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.2);
+}
+
+.ql-cursors {
+  position: absolute;
+  pointer-events: none;
+}
+
+.ql-cursor {
+  position: absolute;
+  border-left: 2px solid;
+  border-left-color: currentColor;
+  height: 1em;
+  margin-left: -1px;
+  pointer-events: none;
+  z-index: 10;
+  animation: blink 1s step-start 0s infinite;
+}
+
+.ql-cursor .ql-cursor-label {
+  position: absolute;
+  top: -1.2em;
+  left: -1px;
+  background-color: currentColor;
+  color: white;
+  font-size: 0.75rem;
+  padding: 0 4px;
+  border-radius: 2px;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  z-index: 10;
+}
+
+/* Cursor blinking animation */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}

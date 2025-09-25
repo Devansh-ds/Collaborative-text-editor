@@ -6,6 +6,10 @@ import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import { store } from "./Redux/store.js";
 
+// Polyfill global for SockJS
+window.global = window;
+
+
 createRoot(document.getElementById("root")).render(
   <BrowserRouter>
     <Provider store={store}>

@@ -2,12 +2,14 @@ package com.devansh.engine;
 
 import lombok.*;
 
+import java.io.Serializable;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Item {
+public class Item implements Serializable {
 
     private String id;
     private String content;

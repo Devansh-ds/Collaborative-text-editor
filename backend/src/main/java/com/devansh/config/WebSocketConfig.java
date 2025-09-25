@@ -9,7 +9,6 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
-
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         config.enableSimpleBroker("/docs");
@@ -23,15 +22,4 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/docs/ws")
                 .setAllowedOrigins("*");
     }
-
-//    @Override
-//    public void configureClientOutboundChannel(ChannelRegistration registration) {
-//        registration.taskExecutor().corePoolSize(1);
-//    }
-//
-//    @Override
-//    public void configureClientInboundChannel(ChannelRegistration registration) {
-//        registration.taskExecutor().corePoolSize(1);
-//    }
-
 }

@@ -17,6 +17,7 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 import org.springframework.web.util.UriTemplate;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,7 @@ public class WebSocketEventListener {
 
     @EventListener
     private void handleSessionConnected(SessionConnectedEvent event) {
+
         SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.wrap(event.getMessage());
         String sessionId = getSessionId(headerAccessor);
         String displayName = getDisplayName(headerAccessor);
@@ -88,11 +90,16 @@ public class WebSocketEventListener {
     }
 
     private String getDisplayName(SimpMessageHeaderAccessor headerAccessor) {
-        String email = headerAccessor.getUser().getName();
+        Principal principal = headerAccessor.getUser();
+        if (principal == null) {
+            throw new RuntimeException("No Principal found in WebSocket session!");
+        }
+        String email = principal.getName();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
         return user.getDisplayName();
     }
+
 
     private String getDocId(SimpMessageHeaderAccessor headerAccessor) {
         return extractDocIdFromPath(headerAccessor.getDestination());

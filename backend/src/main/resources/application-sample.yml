@@ -12,21 +12,22 @@ spring:
       hibernate:
         format_sql: true
 
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: your-email@gmail.com  # your Gmail address
-    password: your-app-password     # Gmail app password (not real email password!)
-    properties:
-      mail:
-        debug: true
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-          connectiontimeout: 5000
-          timeout: 5000
-          writetimeout: 5000
+#only needed for 2 factor auth
+#  mail:
+#    host: smtp.gmail.com
+#    port: 587
+#    username: your-email@gmail.com  # your Gmail address
+#    password: your-app-password     # Gmail app password (not real email password!)
+#    properties:
+#      mail:
+#        debug: true
+#        smtp:
+#          auth: true
+#          starttls:
+#            enable: true
+#          connectiontimeout: 5000
+#          timeout: 5000
+#          writetimeout: 5000
 
 application:
   security:
